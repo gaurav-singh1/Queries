@@ -15,7 +15,7 @@ public class FilterFromDashboard {
 	public static String DELIMITER_QUERY = "_";
 
 	public static void main(String[] args) {
-		
+
 		// *******update the multimap : completely unfold the country,state,
 		// region to finally make values corresponding to location key ...
 
@@ -31,10 +31,10 @@ public class FilterFromDashboard {
 		Map<String, String> singleValueList_Frequent = new HashMap<String, String>();
 
 		Map<String, String> singleValueList_Infrequent = new HashMap<String, String>();
-		
-		Map<String, List<String>> multiValueList_Frequent=new HashMap<String, List<String>>();
-		
-		Map<String, List<String>> multiValueList_Infrequent=new HashMap<String, List<String>>();
+
+		Map<String, List<String>> multiValueList_Frequent = new HashMap<String, List<String>>();
+
+		Map<String, List<String>> multiValueList_Infrequent = new HashMap<String, List<String>>();
 
 		String value_Tocheck, key;
 
@@ -45,11 +45,7 @@ public class FilterFromDashboard {
 
 		for (Entry<String, List<String>> entry : multiMap.entrySet()) {
 			// filtering out the single filter values
-			
-			
-			
-			
-			
+
 			if (entry.getValue().size() == 1) {
 
 				key = entry.getKey();
@@ -61,8 +57,6 @@ public class FilterFromDashboard {
 					// adding to the frequent singleValueList_Frequent
 
 					singleValueList_Frequent.put(key, value_Tocheck);
-					
-					
 
 				}
 
@@ -77,15 +71,15 @@ public class FilterFromDashboard {
 			}
 
 			else {
-				
+
 				// deal with multiValuesFilter here
-				
-				//do union operation for each value in this filterName 
-				
-				//MasterResult of this 
-				
-				//Result
-				
+
+				// do union operation for each value in this filterName
+
+				// MasterResult of this
+
+				// Result
+
 			}
 
 		}
@@ -129,6 +123,8 @@ public class FilterFromDashboard {
 				query = String.join(DELIMITER_QUERY, duplicate_filterValues);
 				searchKey = appSecret + "+" + query + "+" + bucket;
 
+				System.out.println(searchKey);
+
 				boolean searchKey_Found = checkSearchKey(searchKey);
 
 				if (searchKey_Found) {
@@ -136,10 +132,10 @@ public class FilterFromDashboard {
 					// do the need full...search in hbase
 					// and aggregate the result ...store in some data
 					// structure..
-					
-					//MasterResult
-					
-					//Result... do intersection betweeen these two...
+
+					// MasterResult
+
+					// Result... do intersection betweeen these two...
 
 					// now remove the searchKey from the
 					// duplicate_filterValues... for which the results have been
@@ -173,7 +169,11 @@ public class FilterFromDashboard {
 
 	private static String reduceSearchKey(String searchKey) {
 		// TODO Auto-generated method stub
-		return null;
+
+		// reduce according to term frequency .. which will depend upon the keys
+		// in
+
+		return searchKey;
 	}
 
 	private static boolean checkSearchKey(String searchKey) {
@@ -183,13 +183,29 @@ public class FilterFromDashboard {
 
 	private static List<String> getTimeBuckets(String startDate, String endDate) {
 		// TODO Auto-generated method stub
-		return null;
+
+		List<String> timeBuckets = new ArrayList<String>();
+
+		timeBuckets.add("25_Feb_2016");
+
+		return timeBuckets;
 	}
 
 	private static Map<String, List<String>> fillTestData() {
 		// TODO Auto-generated method stub
 
 		Map<String, List<String>> multiMap = new HashMap<String, List<String>>();
+
+		// change for location, phone...
+		List<String> country = new ArrayList<String>();
+		List<String> state = new ArrayList<String>();
+		List<String> city = new ArrayList<String>();
+		List<String> hierarchy_location = getHierarchialLocation(country,
+				state, city);
+
+		// multiMap.put("location", hierarchy_location);
+
+		// put this hierarchy_location in multiMap.... and model details...
 
 		List<String> location = new ArrayList<String>();
 
@@ -233,6 +249,55 @@ public class FilterFromDashboard {
 		multiMap.put("NetworkType", networkType);
 
 		return multiMap;
+	}
+
+	private static List<String> getHierarchialLocation(List<String> country,
+			List<String> states, List<String> cities) {
+		// TODO Auto-generated method stub
+
+		List<String> hierarchialLocation = new ArrayList<String>();
+
+		String location;
+		String[] hierarchy;
+
+		while (country.size() != 0) {
+
+			for (String city : cities) {
+
+				// for each city look into hbase table
+
+				location = "India>Haryana>Gurugram";
+
+				// now extract the state name out from the location list....
+
+				hierarchialLocation.add(location);
+
+				hierarchy = location.split(">");
+				String statewith_City = hierarchy[1];
+
+				states.remove(statewith_City);
+
+			}
+
+			for (String state : states) {
+				// for each state look into the hbase table and extract the
+				// value..
+
+				location = "India>Goa";
+
+				hierarchialLocation.add(location);
+				hierarchy = location.split(">");
+
+				String countrywith_State = hierarchy[1];
+
+				country.remove(countrywith_State);
+
+			}
+
+		}
+
+		return hierarchialLocation;
+
 	}
 
 	private static Map<String, String> getOrderedList(

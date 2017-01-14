@@ -9,29 +9,28 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.json.simple.JSONObject;
 
-public class DashboardHit {
+public class GetTimeBuckets {
 
-	public static void main(String[] args) {
+	public static Map<String, List<String>> coarserTimeBuckets(String startDate, String endDate) {
 		// TODO Auto-generated method stub
 		
 		
-		//this is the query received from the dashboard
-		String sampleQuery="A_B_C_D_E_F";
+		Map<String, List<String>> timeBuckets_H=new HashMap<String, List<String>>();
 		
-		System.out.println(sampleQuery);
 		
-		//check if  the query received is ordered else order it
-		String[] orderedQueries=GetOrderedQueries(sampleQuery);
+	
 		
 		List<String> weekList=new ArrayList<String>();
 		//these parameters are received from the dashboard
-		String date1="28-02-2016";
-		String date2="08-03-2016";
+		String date1=startDate;
+		String date2=endDate;
 		
 		DateFormat formater = new SimpleDateFormat("dd-MM-yyyy");
 		
@@ -369,21 +368,93 @@ public class DashboardHit {
 	    	
 	    	//printing the buckets... 
 	    	
-	    	System.out.println(daysList.toString());
+//	    	System.out.println(daysList.toString());
+//	    	
+//	    	System.out.println(weekList.toString());
+//	    	
+//	    	System.out.println(monthList.toString());
 	    	
-	    	System.out.println(weekList.toString());
+	    	timeBuckets_H.put("day", daysList);
+	    	timeBuckets_H.put("week", weekList);
+	    	timeBuckets_H.put("month", monthList);
 	    	
-	    	System.out.println(monthList.toString());
+	    	
+			return timeBuckets_H;
 	    	
 	    	
 	    	
 	    	
 	    }
-
-	private static String[] GetOrderedQueries(String sampleQuery) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	
+	
+	public static Map<String, List<Integer>> timeBucketsinUTC(Map<String, List<String>> timeBuckets){
+		
+		
+		Map<String, List<Integer>> timeBucketstoUTC=new HashMap<String, List<Integer>>();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		return timeBucketstoUTC;
+		
+		
 	}
+
+	
+	public static List<String> weekToDays(String week){
+		
+		List<String> weekToDays = null;
+		
+		
+		
+		
+		return weekToDays;
+	}
+	
+	
+	public static List<String> monthToWeeks(String month){
+		
+		
+		List<String> monthToWeek = null;
+		
+		
+		
+		
+		
+		
+		
+		return monthToWeek;
+		
+	}
+	
+	
+	public static List<String> monthToDays(String month){
+		
+		
+		
+		
+		
+		List<String> monthToDays = null;
+		
+		
+		
+		
+		
+		return monthToDays;
+		
+		
+		
+		
+		
+	}
+	
 	    
 	    
 		
