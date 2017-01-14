@@ -1,0 +1,66 @@
+config.vm.define "vm1" do |vm1|
+    vm1.vm.box = "vm1"
+
+ vm1.vm.provider:virtualbox do |v|
+   v.customize ["modifyvm", :id, "--memory", 1000]
+ end
+end
+
+  
+
+  config.vm.define "vm2" do |vm2|
+    vm2.vm.box = "vm2"
+
+   vm2.vm.provider:virtualbox do |v|
+   v.customize ["modifyvm", :id, "--memory", 1000]
+ end
+  end
+
+
+
+
+  config.vm.define "vm3" do |vm3|
+    vm3.vm.box = "hashicorp/precise64"
+
+ vm3.vm.provider:virtualbox do |v|
+   v.customize ["modifyvm", :id, "--memory", 10000]
+ end
+end
+
+
+
+config.vm.define "vm4" do |vm4|
+    vm4.vm.box = "hashicorp/precise64"
+
+ vm4.vm.provider:virtualbox do |v|
+   v.customize ["modifyvm", :id, "--memory", 10000]
+ end
+end
+
+
+
+config.vm.define "vm5" do |vm5|
+    vm5.vm.box = "hashicorp/precise64"
+
+ vm5.vm.provider:virtualbox do |v|
+   v.customize ["modifyvm", :id, "--memory", 10000]
+ end
+end
+
+
+config.vm.define "vm5" do |vm5|
+    vm5.vm.box = "hashicorp/precise64"
+
+ vm5.vm.provider:virtualbox do |v|
+   v.customize ["modifyvm", :id, "--memory", 10000]
+ end
+end
+
+
+
+
+
+
+
+
+

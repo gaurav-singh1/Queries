@@ -1,0 +1,14 @@
+to build the jar..
+
+mvn assembly:assembly -DdescriptorId=jar-with-dependencies
+
+
+to run the jar
+
+java -cp target/paho-publish-subscribe-1.0-jar-with-dependencies.jar de.dcsquare.paho.client.subscriber.Subscriber_Testing
+
+
+
+#Broker Messages file location
+
+/home/vagrant/Testing_Happy/loadtestingMQTT/BrokerMessages.txt
