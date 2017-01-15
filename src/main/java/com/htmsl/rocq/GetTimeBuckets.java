@@ -358,7 +358,7 @@ public class GetTimeBuckets {
 		long utc_Time = 0;
 
 		try {
-
+			date =date+" 00:00:00";
 			utc_Time = new SimpleDateFormat("dd_mm_yyyy HH:mm:ss").parse(date)
 					.getTime();
 
@@ -388,7 +388,8 @@ public class GetTimeBuckets {
 		for (String date : dates) {
 
 			try {
-
+				
+				date=date+" 00:00:00";
 				utc_Time = new SimpleDateFormat("dd_mm_yyyy HH:mm:ss").parse(
 						date).getTime();
 

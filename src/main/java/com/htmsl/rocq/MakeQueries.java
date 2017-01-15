@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Collections;
 
-public class FilterFromDashboard {
+public class MakeQueries {
 
 	public static String DELIMITER_QUERY = "_";
 
@@ -28,13 +28,17 @@ public class FilterFromDashboard {
 
 		System.out.println("Multimap is=" + multiMap.toString());
 
-		Map<String, String> singleValueList_Frequent = new HashMap<String, String>();
+		Map<String, String> singleValueMap = new HashMap<String, String>();
 
-		Map<String, String> singleValueList_Infrequent = new HashMap<String, String>();
+		Map<String, String> singleValueMap_Frequent = new HashMap<String, String>();
 
-		Map<String, List<String>> multiValueList_Frequent = new HashMap<String, List<String>>();
+		Map<String, String> singleValueMap_Infrequent = new HashMap<String, String>();
 
-		Map<String, List<String>> multiValueList_Infrequent = new HashMap<String, List<String>>();
+		Map<String, List<String>> multiValueMap = new HashMap<String, List<String>>();
+
+		Map<String, List<String>> multiValueMap_Frequent = new HashMap<String, List<String>>();
+
+		Map<String, List<String>> multiValueMap_Infrequent = new HashMap<String, List<String>>();
 
 		String value_Tocheck, key;
 
@@ -51,22 +55,11 @@ public class FilterFromDashboard {
 				key = entry.getKey();
 				value_Tocheck = entry.getValue().get(0);
 
-				boolean value_Isfrequent = checkFrequency(value_Tocheck);
+				// boolean value_Isfrequent = checkFrequency(value_Tocheck);
 
-				if (value_Isfrequent) {
-					// adding to the frequent singleValueList_Frequent
+				// adding to the frequent singleValueList_Frequent
 
-					singleValueList_Frequent.put(key, value_Tocheck);
-
-				}
-
-				else {
-
-					// adding to the frequent singleValueList_Infrequent
-
-					singleValueList_Infrequent.put(key, value_Tocheck);
-
-				}
+				singleValueMap.put(key, value_Tocheck);
 
 			}
 
@@ -80,6 +73,8 @@ public class FilterFromDashboard {
 
 				// Result
 
+				multiValueMap.put(entry.getKey(), entry.getValue());
+
 			}
 
 		}
@@ -87,60 +82,101 @@ public class FilterFromDashboard {
 		// Now need to make a ordered query out of these according to the
 		// order.txt.....
 
-		Map<String, String> singleValueList_Frequent_Ordered = getOrderedList(singleValueList_Frequent);
+		Map<String, String> singleValueMap_Ordered = getOrderedList(singleValueMap);
 
-		System.out.println(singleValueList_Frequent.toString());
+		System.out.println(singleValueMap.toString());
 
-		Collection<String> filterValues_Ordered = singleValueList_Frequent_Ordered
-				.values();
 
 		String query;
 
-		// this is the query which needs to be appended with time buckets and
-		// pre pended with appSecret so it can be looked up in hbase tqbles
+		// this is the query which needs to be prepended with time buckets and
+		// with appSecret so it can be looked up in hbase tqbles
 
 		String appSecret = "33d1575713";
 		String startDate = "mm/dd/yyyy";
 		String endDate = "mm/dd/yyyy";
 
-		List<String> timeBuckets = getTimeBuckets(startDate, endDate);
+		Map<String, List<Long>> timeBuckets = getTimeBuckets(startDate, endDate);
 
 		// Now Making the final query to lookup in hbase...
 
 		String searchKey;
 
-		for (String bucket : timeBuckets) {
+		// ********* check which Hbase Table(day, week, Month to
+		// use)**********
 
-			// ********* check which Hbase Table(day, week, Month to
-			// use)**********
+		List<Long> utc_dayList = timeBuckets.get("day");
+		List<Long> utc_weekList = timeBuckets.get("week");
+		List<Long> utc_monthList = timeBuckets.get("month");
 
+		
+
+		// making queries to be looked in Hbase_Day Table..the result will be
+		// hbase objects
+
+		String hbaseKey;
+		boolean searchKey_Found;
+
+		for (long dayBucket : utc_dayList) {
+			
+			String HbaseTable="DayWise";
+			
+			// segregate frequent and infrequent items...for both single value
+			// list
+			
+			//singleValueMap ordering should be done so that the freq and infreq map formed will be ordered..
+			
+			
+
+			for (Entry<String, String> entry : singleValueMap_Ordered.entrySet()) {
+
+				searchKey = appSecret + "+" + dayBucket + "+"
+						+ entry.getValue();
+
+				// check if this key is present in hbase else put this key in
+				// singleValue_InfrequentMap
+
+				searchKey_Found = checkSearchKey(searchKey);
+
+				if (searchKey_Found) {
+
+					singleValueMap_Frequent.put(entry.getKey(),
+							entry.getValue());
+				}
+
+				else {
+
+					singleValueMap_Infrequent.put(entry.getKey(),
+							entry.getValue());
+				}
+
+			}
+			
+			
+			
+			//now the single value map is obtained .... with differentiation on where to find these ....either hbase or parquet...
+			
+		
+			Collection<String> filterValues_Frequent_Ordered = singleValueMap_Frequent
+					.values();
+			
 			List<String> duplicate_filterValues = new ArrayList<String>(
-					filterValues_Ordered);
-
+					filterValues_Frequent_Ordered);
+			
 			while (duplicate_filterValues.size() != 0) {
 				// this will be searched in hbase
 
 				query = String.join(DELIMITER_QUERY, duplicate_filterValues);
-				searchKey = appSecret + "+" + query + "+" + bucket;
+				searchKey = appSecret + "+" + dayBucket + "+" + query;
 
-				System.out.println(searchKey);
+				searchKey_Found=checkInHbase(searchKey, HbaseTable);
 
-				boolean searchKey_Found = checkSearchKey(searchKey);
+				
 
 				if (searchKey_Found) {
 
-					// do the need full...search in hbase
-					// and aggregate the result ...store in some data
-					// structure..
-
-					// MasterResult
-
-					// Result... do intersection betweeen these two...
-
-					// now remove the searchKey from the
-					// duplicate_filterValues... for which the results have been
-					// computed
-
+					
+					//store the hbase result in some Variable which needs to be intersected with others in this loop
 					String[] toRemoveValues = query.split(DELIMITER_QUERY);
 
 					for (String removedValue : toRemoveValues) {
@@ -162,9 +198,55 @@ public class FilterFromDashboard {
 				}
 
 			}
+			
+			
+			//similarly find the results of infrequent single val keys in parquet... and store in some Variable...
+			
+			
+			
+			
+			
+			
+
+			for (Entry<String, List<String>> entry : multiValueMap.entrySet()) {
+
+				key = entry.getKey();
+				List<String> values = entry.getValue();
+
+				
+				for (String value : values) {
+
+					searchKey = appSecret + "+" + dayBucket + "+"
+							+ entry.getValue();
+					searchKey_Found = checkSearchKey(searchKey);
+
+					if (searchKey_Found) {
+
+						//pick this hbase buffer and do union
+
+					}
+
+					else { 
+
+						//search this in parquet... do 
+
+					}
+
+				}
+
+				//for this key do union of frequent and infrequent values store in multiVal({"location", union of all the buffers},,,,,.....)
+
+			}
 
 		}
 
+		
+
+	}
+
+	private static boolean checkInHbase(String searchKey, String hbaseTable) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	private static String reduceSearchKey(String searchKey) {
@@ -181,14 +263,19 @@ public class FilterFromDashboard {
 		return false;
 	}
 
-	private static List<String> getTimeBuckets(String startDate, String endDate) {
+	private static Map<String, List<Long>> getTimeBuckets(String startDate,
+			String endDate) {
 		// TODO Auto-generated method stub
 
-		List<String> timeBuckets = new ArrayList<String>();
+		// List<String> timeBuckets = new ArrayList<String>();
 
-		timeBuckets.add("25_Feb_2016");
+		Map<String, List<Long>> utc_TimeBuckets = new HashMap<String, List<Long>>();
 
-		return timeBuckets;
+		List<Long> utc_dayList = new ArrayList<Long>();
+		utc_dayList.add(1453401000000l);
+		utc_TimeBuckets.put("day", utc_dayList);
+
+		return utc_TimeBuckets;
 	}
 
 	private static Map<String, List<String>> fillTestData() {
