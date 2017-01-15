@@ -15,8 +15,8 @@ public class Test_Bucket_To_UTC {
 		Map<String, List<Integer>> timeBucketstoUTC=new HashMap<String, List<Integer>>();
 		
 		
-		String startDate="28-03-2016";
-		String endDate="15-04-2016";
+		String startDate="01-01-2017";
+		String endDate="26-03-2017";
 		
 		
 		Map<String, List<String>> timeBuckets=GetTimeBuckets.coarserTimeBuckets(startDate, endDate);
@@ -25,12 +25,22 @@ public class Test_Bucket_To_UTC {
 		
 		
 		
-		for(Entry<String, List<String>> list : timeBuckets.entrySet()){
-			
-			
-			
-			
-		}
+		List<String> dayList=timeBuckets.get("day");
+		
+		List<String> weekList=timeBuckets.get("week");
+		
+		List<String> monthList=timeBuckets.get("month");
+		
+		
+		
+		System.out.println("^^^^^^^^^^^^--------------^^^^^^^^^^^^^");
+		
+	//	System.out.println(GetTimeBuckets.dayInUTC("28_02_2017 00:00:00"));
+		
+		//there will be two function that will do the following:
+		//1. convert the day into UTC 
+		//2. convert the List<day> into UTC List...
+		
 		
 		
 		
