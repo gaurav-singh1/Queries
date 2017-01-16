@@ -1,5 +1,10 @@
 package com.htmsl.rocq;
 
+import com.htmsl.rocq.configuration.HbaseConfigurationConstants;
+
+import org.apache.hadoop.hbase.client.Result;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -9,6 +14,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Collections;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.util.Bytes;
 
 public class MakeQueries {
 
@@ -40,7 +53,7 @@ public class MakeQueries {
 
 		Map<String, List<String>> multiValueMap_Infrequent = new HashMap<String, List<String>>();
 
-		String value_Tocheck, key;
+		String value, key;
 
 		// Now the single column value filter need to be unfolded and the filter
 		// with multiple values should be
@@ -53,13 +66,13 @@ public class MakeQueries {
 			if (entry.getValue().size() == 1) {
 
 				key = entry.getKey();
-				value_Tocheck = entry.getValue().get(0);
+				value = entry.getValue().get(0);
 
 				// boolean value_Isfrequent = checkFrequency(value_Tocheck);
 
 				// adding to the frequent singleValueList_Frequent
 
-				singleValueMap.put(key, value_Tocheck);
+				singleValueMap.put(key, value);
 
 			}
 
@@ -86,7 +99,6 @@ public class MakeQueries {
 
 		System.out.println(singleValueMap.toString());
 
-
 		String query;
 
 		// this is the query which needs to be prepended with time buckets and
@@ -109,26 +121,28 @@ public class MakeQueries {
 		List<Long> utc_weekList = timeBuckets.get("week");
 		List<Long> utc_monthList = timeBuckets.get("month");
 
-		
-
 		// making queries to be looked in Hbase_Day Table..the result will be
 		// hbase objects
 
-		String hbaseKey;
 		boolean searchKey_Found;
 
+		//
+		Configuration conf = getHbaseConnection();
+
+		// HTable hTable = new HTable(hConf, tableName);
+
 		for (long dayBucket : utc_dayList) {
-			
-			String HbaseTable="DayWise";
-			
+
+			String tableName = "DayWise";
+
 			// segregate frequent and infrequent items...for both single value
 			// list
-			
-			//singleValueMap ordering should be done so that the freq and infreq map formed will be ordered..
-			
-			
 
-			for (Entry<String, String> entry : singleValueMap_Ordered.entrySet()) {
+			// singleValueMap ordering should be done so that the freq and
+			// infreq map formed will be ordered..
+
+			for (Entry<String, String> entry : singleValueMap_Ordered
+					.entrySet()) {
 
 				searchKey = appSecret + "+" + dayBucket + "+"
 						+ entry.getValue();
@@ -136,7 +150,7 @@ public class MakeQueries {
 				// check if this key is present in hbase else put this key in
 				// singleValue_InfrequentMap
 
-				searchKey_Found = checkSearchKey(searchKey);
+				searchKey_Found = checkSearchKey(searchKey, conf, tableName);
 
 				if (searchKey_Found) {
 
@@ -151,32 +165,28 @@ public class MakeQueries {
 				}
 
 			}
-			
-			
-			
-			//now the single value map is obtained .... with differentiation on where to find these ....either hbase or parquet...
-			
-		
+
+			// now the single value map is obtained .... with differentiation on
+			// where to find these ....either hbase or parquet...
+
 			Collection<String> filterValues_Frequent_Ordered = singleValueMap_Frequent
 					.values();
-			
+
 			List<String> duplicate_filterValues = new ArrayList<String>(
 					filterValues_Frequent_Ordered);
-			
+
 			while (duplicate_filterValues.size() != 0) {
 				// this will be searched in hbase
 
 				query = String.join(DELIMITER_QUERY, duplicate_filterValues);
 				searchKey = appSecret + "+" + dayBucket + "+" + query;
 
-				searchKey_Found=checkInHbase(searchKey, HbaseTable);
-
-				
+				searchKey_Found = checkInHbase(searchKey, tableName);
 
 				if (searchKey_Found) {
 
-					
-					//store the hbase result in some Variable which needs to be intersected with others in this loop
+					// store the hbase result in some Variable which needs to be
+					// intersected with others in this loop
 					String[] toRemoveValues = query.split(DELIMITER_QUERY);
 
 					for (String removedValue : toRemoveValues) {
@@ -198,54 +208,61 @@ public class MakeQueries {
 				}
 
 			}
-			
-			
-			//similarly find the results of infrequent single val keys in parquet... and store in some Variable...
-			
-			
-			
-			
-			
-			
+
+			// similarly find the results of infrequent single val keys in
+			// parquet... and store in some Variable...
 
 			for (Entry<String, List<String>> entry : multiValueMap.entrySet()) {
 
 				key = entry.getKey();
 				List<String> values = entry.getValue();
 
-				
-				for (String value : values) {
+				for (String value1 : values) {
 
-					searchKey = appSecret + "+" + dayBucket + "+"
-							+ entry.getValue();
-					searchKey_Found = checkSearchKey(searchKey);
+					searchKey = appSecret + "+" + dayBucket + "+" + value1;
+					searchKey_Found = checkSearchKey(searchKey, conf, tableName);
 
 					if (searchKey_Found) {
 
-						//pick this hbase buffer and do union
+						// pick this hbase buffer and do union
 
 					}
 
-					else { 
+					else {
 
-						//search this in parquet... do 
+						// search this in parquet... do
 
 					}
 
 				}
 
-				//for this key do union of frequent and infrequent values store in multiVal({"location", union of all the buffers},,,,,.....)
+				// for this key do union of frequent and infrequent values store
+				// in multiVal({"location", union of all the buffers},,,,,.....)
 
 			}
 
 		}
 
-		
+	}
 
+	private static Configuration getHbaseConnection() {
+		// TODO Auto-generated method stub
+
+		Configuration dummyconf = new Configuration();
+
+		dummyconf.addResource("/etc/hbase/conf/hbase-site.xml");
+		dummyconf.set("hbase.zookeeper.quorum",
+				"static.232.40.46.78.clients.your-server.de");
+		dummyconf.set("hbase.zookeeper.property.clientPort", "2181");
+		dummyconf.set("zookeeper.znode.parent", "/hbase-unsecure");
+		Configuration conf = HBaseConfiguration.create(dummyconf);
+
+		return conf;
 	}
 
 	private static boolean checkInHbase(String searchKey, String hbaseTable) {
 		// TODO Auto-generated method stub
+
 		return false;
 	}
 
@@ -258,9 +275,37 @@ public class MakeQueries {
 		return searchKey;
 	}
 
-	private static boolean checkSearchKey(String searchKey) {
+	private static boolean checkSearchKey(String searchKey,
+			Configuration config, String tableName) {
 		// TODO Auto-generated method stub
+		HTable table = null;
+		try {
+			table = new HTable(config, tableName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Get g = new Get(Bytes.toBytes(searchKey));
+
+		Result result = null;
+		try {
+			result = table.get(g);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+
+			System.out.println("difficulty in reading data from the row");
+			e.printStackTrace();
+		}
+
+		byte[] value = result.getValue(Bytes.toBytes("buffer"),
+				Bytes.toBytes("hllbuffer"));
+
+		byte[] value1 = result.getValue(Bytes.toBytes("buffer"),
+				Bytes.toBytes("minhashbuffer"));
+
 		return false;
+
 	}
 
 	private static Map<String, List<Long>> getTimeBuckets(String startDate,

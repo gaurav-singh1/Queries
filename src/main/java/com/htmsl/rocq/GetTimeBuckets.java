@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.DurationFieldType;
 import org.json.simple.JSONObject;
 
 public class GetTimeBuckets {
@@ -495,6 +498,23 @@ public class GetTimeBuckets {
 
 		return utc_Times;
 
+	}
+	
+	
+	public static List<String> allDaysBuckets(String sDate, String eDate){
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+		List<String> dayList=new ArrayList<String>();
+		
+		LocalDate startDate=LocalDate.parse(sDate, formatter);
+		LocalDate endDate=LocalDate.parse(eDate, formatter);
+
+		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+	       
+			dayList.add(date.toString());
+	    }
+		
+		return dayList;
 	}
 
 }

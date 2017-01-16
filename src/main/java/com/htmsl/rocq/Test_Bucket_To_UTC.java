@@ -36,7 +36,10 @@ public class Test_Bucket_To_UTC {
 		
 		System.out.println("^^^^^^^^^^^^--------------^^^^^^^^^^^^^");
 		
-		System.out.println(GetTimeBuckets.daysInUTC(dayList).toString());
+	//	System.out.println(GetTimeBuckets.daysInUTC(dayList).toString());
+		
+		System.out.println(GetTimeBuckets.allDaysBuckets("01_01_2016", "03_02_2016"));
+		
 		
 		//there will be two function that will do the following:
 		//1. convert the day into UTC 
