@@ -1,26 +1,26 @@
 package com.htmsl.rocq;
 
-import com.htmsl.rocq.configuration.HbaseConfigurationConstants;
+//import com.htmsl.rocq.configuration.HbaseConfigurationConstants;
 
 import org.apache.hadoop.hbase.client.Result;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
+//import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Collections;
+//import java.util.Collections;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
+//import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.HTableInterface;
+//import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class MakeQueries {
@@ -56,7 +56,7 @@ public class MakeQueries {
 		String value, key;
 
 		// Now the single column value filter need to be unfolded and the filter
-		// with multiple values should be
+		// with multiple values should be picked from the hbase table(hll, minhash buffers)
 		// combined into one by applying union operation on all the multiple
 		// values...
 
@@ -80,11 +80,7 @@ public class MakeQueries {
 
 				// deal with multiValuesFilter here
 
-				// do union operation for each value in this filterName
-
-				// MasterResult of this
-
-				// Result
+				
 
 				multiValueMap.put(entry.getKey(), entry.getValue());
 
@@ -124,10 +120,10 @@ public class MakeQueries {
 		// making queries to be looked in Hbase_Day Table..the result will be
 		// hbase objects
 
-		boolean searchKey_Found;
+		boolean searchKey_Found=false;
 
 		//
-		Configuration conf = getHbaseConnection();
+		//Configuration conf = getHbaseConnection();
 
 		// HTable hTable = new HTable(hConf, tableName);
 
@@ -150,7 +146,7 @@ public class MakeQueries {
 				// check if this key is present in hbase else put this key in
 				// singleValue_InfrequentMap
 
-				searchKey_Found = checkSearchKey(searchKey, conf, tableName);
+			//	searchKey_Found = checkSearchKey(searchKey, conf, tableName);
 
 				if (searchKey_Found) {
 
@@ -177,10 +173,10 @@ public class MakeQueries {
 
 			while (duplicate_filterValues.size() != 0) {
 				// this will be searched in hbase
-
+				
 				query = String.join(DELIMITER_QUERY, duplicate_filterValues);
 				searchKey = appSecret + "+" + dayBucket + "+" + query;
-
+				
 				searchKey_Found = checkInHbase(searchKey, tableName);
 
 				if (searchKey_Found) {
@@ -192,6 +188,10 @@ public class MakeQueries {
 					for (String removedValue : toRemoveValues) {
 
 						// modifying the duplicate_filterValues...
+						
+						//
+						
+						
 						duplicate_filterValues.remove(removedValue);
 
 					}
@@ -205,6 +205,8 @@ public class MakeQueries {
 
 					searchKey = reduceSearchKey(searchKey);
 
+					
+					
 				}
 
 			}
@@ -213,24 +215,25 @@ public class MakeQueries {
 			// parquet... and store in some Variable...
 
 			for (Entry<String, List<String>> entry : multiValueMap.entrySet()) {
-
+				
 				key = entry.getKey();
 				List<String> values = entry.getValue();
-
+				
 				for (String value1 : values) {
-
+					
 					searchKey = appSecret + "+" + dayBucket + "+" + value1;
-					searchKey_Found = checkSearchKey(searchKey, conf, tableName);
+				//	searchKey_Found = checkSearchKey(searchKey, conf, tableName);
 
 					if (searchKey_Found) {
 
 						// pick this hbase buffer and do union
 
 					}
-
+					
 					else {
 
 						// search this in parquet... do
+						
 
 					}
 
@@ -248,6 +251,7 @@ public class MakeQueries {
 	private static Configuration getHbaseConnection() {
 		// TODO Auto-generated method stub
 
+	
 		Configuration dummyconf = new Configuration();
 
 		dummyconf.addResource("/etc/hbase/conf/hbase-site.xml");
