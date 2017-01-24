@@ -361,8 +361,9 @@ public class GetTimeBuckets {
 		long utc_Time = 0;
 
 		try {
-			date =date+" 00:00:00";
-			utc_Time = new SimpleDateFormat("dd_mm_yyyy HH:mm:ss").parse(date)
+			date = date + " 00:00:00";
+
+			utc_Time = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss").parse(date)
 					.getTime();
 
 		} catch (ParseException e) {
@@ -391,9 +392,9 @@ public class GetTimeBuckets {
 		for (String date : dates) {
 
 			try {
-				
-				date=date+" 00:00:00";
-				utc_Time = new SimpleDateFormat("dd_mm_yyyy HH:mm:ss").parse(
+
+				date = date + " 00:00:00";
+				utc_Time = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss").parse(
 						date).getTime();
 
 				daysInUTC.add(utc_Time);
@@ -499,22 +500,109 @@ public class GetTimeBuckets {
 		return utc_Times;
 
 	}
-	
-	
-	public static List<String> allDaysBuckets(String sDate, String eDate){
-		
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
-		List<String> dayList=new ArrayList<String>();
-		
-		LocalDate startDate=LocalDate.parse(sDate, formatter);
-		LocalDate endDate=LocalDate.parse(eDate, formatter);
 
-		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-	       
+	public static List<String> allDaysBuckets(String sDate, String eDate) {
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+		List<String> dayList = new ArrayList<String>();
+
+		LocalDate startDate = LocalDate.parse(sDate, formatter);
+		LocalDate endDate = LocalDate.parse(eDate, formatter);
+
+		for (LocalDate date = startDate; !date.isAfter(endDate); date = date
+				.plusDays(1)) {
+
 			dayList.add(date.toString());
-	    }
-		
+		}
+
 		return dayList;
+	}
+
+	public static String getDateFromTimestamp(long timestamp) {
+
+		String date = new java.text.SimpleDateFormat("dd_MM_yyyy")
+				.format(new java.util.Date(timestamp));
+
+		return date;
+	}
+
+	public static List<Long> monthToWeekBuckets(long monthBucketInUTC) {
+		// no of milliseconds in a week is=604800000
+
+		List<Long> weekBucketsInUTC = new ArrayList<Long>();
+
+		long weekBucketInUTC = monthBucketInUTC;
+
+		// monthBucket =
+
+		// every month contains 5 weeks though the last month is not of 7
+		// days,,, and when feb of !leap year has only 4 weeks...
+		// the last week can contain 1, 2 or 3 days,,
+		for (int i = 1; i <= 5; i++) {
+
+			weekBucketsInUTC.add(weekBucketInUTC);
+			weekBucketInUTC = weekBucketInUTC + 604800000;
+
+		}
+
+		// need to check if this contains feb in a non leap year
+
+		// convert the monthBucketInUTC
+
+		String date = getDateFromTimestamp(monthBucketInUTC);
+
+		// parsing the date....
+
+		String[] date_parts = date.split("_");
+
+		long year = Long.parseLong(date_parts[2]);
+		long month_no = Long.parseLong(date_parts[1]);
+
+		if (year % 4 != 0 && month_no == 2) {
+
+			weekBucketsInUTC.remove(weekBucketsInUTC.size() - 1);
+		}
+
+		return weekBucketsInUTC;
+	}
+
+	public static List<Long> weektoDayInUTC(long weekInUTC) {
+		List<Long> daysInUTC = new ArrayList<Long>();
+
+		String date = getDateFromTimestamp(weekInUTC);
+
+		String[] date_parts = date.split("_");
+		long dayInUTC = weekInUTC;
+		String day = date_parts[0];
+		// if its the last week of the month then it will contain only th 1 | 2
+		// | 3 days..
+		if (day.equals("29")) {
+
+			// get the last day of month
+
+			Calendar mycal = new GregorianCalendar(
+					Integer.parseInt(date_parts[2]),
+					Integer.parseInt(date_parts[1]), 0);
+
+			int daysInMonth = mycal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+			for (int i = 29; i <= daysInMonth; i++) {
+
+				daysInUTC.add(dayInUTC);
+				dayInUTC = dayInUTC + 86400000;
+			}
+
+		} else {
+			for (int i = 1; i <= 7; i++) {
+
+				daysInUTC.add(dayInUTC);
+				dayInUTC = dayInUTC + 86400000;
+
+			}
+
+		}
+
+		return daysInUTC;
 	}
 
 }

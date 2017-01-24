@@ -11,7 +11,6 @@ public class Test_Bucket_To_UTC {
 		// TODO Auto-generated method stub
 		
 		
-		
 		Map<String, List<Integer>> timeBucketstoUTC=new HashMap<String, List<Integer>>();
 		
 		
@@ -34,7 +33,7 @@ public class Test_Bucket_To_UTC {
 		
 		
 		
-		System.out.println("^^^^^^^^^^^^--------------^^^^^^^^^^^^^");
+		System.out.println("^^^^^^^^^^^^all day buckets^^^^^^^^^^^^^");
 		
 	//	System.out.println(GetTimeBuckets.daysInUTC(dayList).toString());
 		
@@ -50,11 +49,19 @@ public class Test_Bucket_To_UTC {
 		
 		//long epoch = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse("01/01/1970 01:00:00").getTime() / 1000;
 
+		System.out.println("===================================");
 		
 		
+		long millis=GetTimeBuckets.monthInUTC("03_2016");
+		System.out.println(millis);
 		
+		System.out.println("===================================");
 		
+		System.out.println(GetTimeBuckets.monthToWeekBuckets(1422729000000l).toString());
 		
+		System.out.println("=================================");
+		
+		System.out.println(GetTimeBuckets.weektoDayInUTC(1425148200000l).toString());
 
 	}
 
