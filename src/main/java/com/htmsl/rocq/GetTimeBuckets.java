@@ -460,7 +460,7 @@ public class GetTimeBuckets {
 
 			int day = 7 * (weekNo - 1) + 1;
 
-			String date = day + "_" + month + "-" + year;
+			String date = day + "_" + month + "_" + year;
 
 			dayList.add(date);
 

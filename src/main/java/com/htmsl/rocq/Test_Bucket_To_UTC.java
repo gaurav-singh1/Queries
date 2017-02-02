@@ -24,12 +24,15 @@ public class Test_Bucket_To_UTC {
 		
 		
 		
+		
 		List<String> dayList=timeBuckets.get("day");
+		List<Long> daysUTC=GetTimeBuckets.daysInUTC(dayList);
 		
 		List<String> weekList=timeBuckets.get("week");
+		List<Long> weekUTC=GetTimeBuckets.weeksInUTC(weekList);
 		
 		List<String> monthList=timeBuckets.get("month");
-		
+		List<Long> monthUTC=GetTimeBuckets.monthsInUTC(monthList);
 		
 		
 		

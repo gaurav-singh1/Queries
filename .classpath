@@ -209,5 +209,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="/Users/gaurav/Documents/workspace/SavePushData/sparq_savepushdata/WebContent/WEB-INF/lib/hbase-client-0.98.7-hadoop1.jar"/>
 	<classpathentry kind="lib" path="/Users/gaurav/Documents/workspace/SavePushData/sparq_savepushdata/WebContent/WEB-INF/lib/hbase-common-0.98.7-hadoop1.jar"/>
+	<classpathentry kind="lib" path="/Users/gaurav/Downloads/Boiler-assembly-1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/gaurav/Desktop/hllplusplusudaf-1.0-SNAPSHOT-jar-with-dependencies.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
